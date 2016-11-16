@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("GoogleFontDownloader")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("© COPYRIGHT 2014 - 2016 DREIWERKEN GMBH")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

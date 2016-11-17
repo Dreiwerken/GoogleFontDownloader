@@ -34,5 +34,51 @@ namespace GoogleFontDownloader.Properties {
                 this["lastFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/Luzifix/GoogleFontDownloader/releases")]
+        public string ReleaseURL {
+            get {
+                return ((string)(this["ReleaseURL"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://api.github.com/repos/Luzifix/GoogleFontDownloader/releases")]
+        public string ReleaseAPI {
+            get {
+                return ((string)(this["ReleaseAPI"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
+            "Chrome/54.0.2840.99 Safari/537.36")]
+        public string UserAgent {
+            get {
+                return ((string)(this["UserAgent"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://fonts.google.com/metadata/fonts")]
+        public string FontsURL {
+            get {
+                return ((string)(this["FontsURL"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://fonts.googleapis.com/css?family=")]
+        public string FontBaseURL {
+            get {
+                return ((string)(this["FontBaseURL"]));
+            }
+        }
     }
 }

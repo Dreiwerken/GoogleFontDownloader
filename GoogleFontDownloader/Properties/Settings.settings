@@ -5,5 +5,20 @@
     <Setting Name="lastFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="ReleaseURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://github.com/Luzifix/GoogleFontDownloader/releases</Value>
+    </Setting>
+    <Setting Name="ReleaseAPI" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://api.github.com/repos/Luzifix/GoogleFontDownloader/releases</Value>
+    </Setting>
+    <Setting Name="UserAgent" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36</Value>
+    </Setting>
+    <Setting Name="FontsURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://fonts.google.com/metadata/fonts</Value>
+    </Setting>
+    <Setting Name="FontBaseURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://fonts.googleapis.com/css?family=</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

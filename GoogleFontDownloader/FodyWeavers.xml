@@ -1,0 +1,4 @@
+﻿<Weavers>
+    <Costura/>
+    <Costura IncludeDebugSymbols='false' />
+</Weavers>

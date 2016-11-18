@@ -105,41 +105,51 @@ namespace GoogleFontDownloader
                     progressBar.Value = 0;
                 });
 
-                string fontPath = folderPath.Text + "/fonts/";
-                if (Directory.Exists(fontPath))
+                try
                 {
-                    Directory.Delete(fontPath, true);
-                }
-
-                Directory.CreateDirectory(fontPath);
-                File.Delete(folderPath.Text + "/fonts.css");
-
-                foreach (var font in matchs)
-                {
-                    string fontExt = Path.GetExtension(font[1]);
-                    string fontName = font[0].Replace(" ", "").Replace("-", "");
-                    string saveName = fontName + fontExt;
-                    int count = 0;
-
-                    while (File.Exists(fontPath + saveName))
+                    string fontPath = folderPath.Text + "/fonts/";
+                    if (Directory.Exists(fontPath))
                     {
-                        saveName = fontName + count++ + fontExt;
+                        Directory.Delete(fontPath, true);
                     }
 
-                    css = css.Replace(font[1], "fonts/" + saveName);
-                    webClient.DownloadFile(font[1], fontPath + saveName);
+                    Directory.CreateDirectory(fontPath);
+                    File.Delete(folderPath.Text + "/fonts.css");
 
-
-                    progressBar.Invoke((MethodInvoker)delegate
+                    foreach (var font in matchs)
                     {
-                        progressBar.Value += 1;
-                    });
+                        string fontExt = Path.GetExtension(font[1]);
+                        string fontName = font[0].Replace(" ", "").Replace("-", "");
+                        string saveName = fontName + fontExt;
+                        int count = 0;
+
+                        while (File.Exists(fontPath + saveName))
+                        {
+                            saveName = fontName + count++ + fontExt;
+                        }
+
+                        css = css.Replace(font[1], "fonts/" + saveName);
+
+                        if (File.Exists(fontPath + saveName))
+                            File.Delete(fontPath + saveName);
+
+                        webClient.DownloadFile(font[1], fontPath + saveName);
+
+                        progressBar.Invoke((MethodInvoker)delegate
+                        {
+                            progressBar.Value += 1;
+                        });
+                    }
+
+                    File.WriteAllText(folderPath.Text + "/fonts.css", css);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
             }
-
-            File.WriteAllText(folderPath.Text + "/fonts.css", css);
         }
-
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {

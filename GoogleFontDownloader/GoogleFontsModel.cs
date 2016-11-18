@@ -23,14 +23,16 @@ namespace GoogleFontDownloader
         public int popularity { get; set; }
         public int size { get; set; }
         public IList<string> subsets { get; set; }
+        public Dictionary<string, bool> parsedSubsets { get; set; } = new Dictionary<string, bool>(); // not in API
         public int trending { get; set; }
-        public bool selected { get; set; }
+        public bool selected { get; set; } // not in API
     }
 
     class GoogleFontTypeModel
     {
         public int slant { get; set; }
-        public int thickness  { get; set; }
+        public int thickness { get; set; }
         public int width { get; set; }
+        public bool selected { get; set; } // not in API
     }
 }

@@ -33,7 +33,9 @@
             this.selectFont = new System.Windows.Forms.Button();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.fontSearch = new System.Windows.Forms.TextBox();
-            this.fontList = new System.Windows.Forms.ListView();
+            this.fontTree = new System.Windows.Forms.TreeView();
+            this.label2 = new System.Windows.Forms.Label();
+            this.loadTimeLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -47,7 +49,7 @@
             // 
             // selectFont
             // 
-            this.selectFont.Location = new System.Drawing.Point(426, 284);
+            this.selectFont.Location = new System.Drawing.Point(426, 294);
             this.selectFont.Name = "selectFont";
             this.selectFont.Size = new System.Drawing.Size(138, 23);
             this.selectFont.TabIndex = 3;
@@ -61,29 +63,45 @@
             this.fontSearch.Name = "fontSearch";
             this.fontSearch.Size = new System.Drawing.Size(481, 20);
             this.fontSearch.TabIndex = 5;
-            this.fontSearch.TextChanged += new System.EventHandler(this.fontSearch_TextChanged);
             // 
-            // fontList
+            // fontTree
             // 
-            this.fontList.FullRowSelect = true;
-            this.fontList.GridLines = true;
-            this.fontList.LabelEdit = true;
-            this.fontList.Location = new System.Drawing.Point(12, 33);
-            this.fontList.Name = "fontList";
-            this.fontList.Size = new System.Drawing.Size(552, 230);
-            this.fontList.TabIndex = 0;
-            this.fontList.UseCompatibleStateImageBehavior = false;
-            this.fontList.View = System.Windows.Forms.View.Details;
+            this.fontTree.Location = new System.Drawing.Point(12, 33);
+            this.fontTree.Name = "fontTree";
+            this.fontTree.Size = new System.Drawing.Size(552, 245);
+            this.fontTree.TabIndex = 6;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 300);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(60, 13);
+            this.label2.TabIndex = 7;
+            this.label2.Text = "Load Time:";
+            // 
+            // loadTimeLabel
+            // 
+            this.loadTimeLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(175)))), ((int)(((byte)(80)))));
+            this.loadTimeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.loadTimeLabel.Location = new System.Drawing.Point(78, 294);
+            this.loadTimeLabel.Name = "loadTimeLabel";
+            this.loadTimeLabel.Size = new System.Drawing.Size(100, 23);
+            this.loadTimeLabel.TabIndex = 8;
+            this.loadTimeLabel.Text = "Fast";
+            this.loadTimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // FontSelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(569, 319);
+            this.ClientSize = new System.Drawing.Size(569, 330);
+            this.Controls.Add(this.loadTimeLabel);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.fontTree);
             this.Controls.Add(this.fontSearch);
             this.Controls.Add(this.selectFont);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.fontList);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FontSelectForm";
             this.Text = "GoogleFontDownloader: Font select";
@@ -98,6 +116,8 @@
         private System.Windows.Forms.Button selectFont;
         private System.ComponentModel.BackgroundWorker backgroundWorker;
         private System.Windows.Forms.TextBox fontSearch;
-        private System.Windows.Forms.ListView fontList;
+        private System.Windows.Forms.TreeView fontTree;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label loadTimeLabel;
     }
 }

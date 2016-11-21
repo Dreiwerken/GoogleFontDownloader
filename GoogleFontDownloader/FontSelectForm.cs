@@ -30,6 +30,7 @@ namespace GoogleFontDownloader
 
             fontTree.CheckBoxes = true;
             fontTree.AfterCheck += FontTree_AfterCheck;
+
             backgroundWorker.DoWork += BackgroundWorker_DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
             backgroundWorker.RunWorkerAsync();
@@ -38,6 +39,7 @@ namespace GoogleFontDownloader
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             initComplete = true;
+            fontTree.Enabled = true;
         }
 
         private void FontTree_AfterCheck(object sender, TreeViewEventArgs e)
@@ -45,12 +47,36 @@ namespace GoogleFontDownloader
             if (!initComplete)
                 return;
 
-            CheckChildeNodeWhenParentChecked(e.Node, e.Node.Checked);
-
-            if (e.Node.Name.Contains("/tile|"))
-                CalcLoadTime(e.Node.Checked);
-
+            CheckParent(e.Node);
             CheckFontsInFontList(e.Node);
+            CalcLoadTime();
+        }
+
+        private void CheckParent(TreeNode node)
+        {
+            if(node.Parent != null)
+            {
+                if(node.Checked)
+                {
+                    if(!node.Parent.Checked)
+                        node.Parent.Checked = true;
+                }
+
+                // Uncheck parent if all childs uncheckd
+                foreach (TreeNode child in node.Parent.Nodes)
+                {
+                    if (child.Checked)
+                        return;
+                }
+
+                if (node.Parent.Checked)
+                    node.Parent.Checked = false;
+            }
+            else if(node.Parent == null && !node.Checked)
+            {
+                foreach (TreeNode child in node.Nodes)
+                    child.Checked = false;
+            }
         }
 
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -73,18 +99,9 @@ namespace GoogleFontDownloader
                     parsedfonts = JsonConvert.DeserializeObject<GoogleFontsModel>(rawFonts);
                 }
 
+                
                 foreach (GoogleFontEntryModel font in parsedfonts.familyMetadataList.OrderBy(f => f.defaultSort))
-                {
-
-                    foreach(string subset in font.subsets)
-                    {
-                        font.parsedSubsets.Add(subset, false);
-                    }
-
                     fonts.Add(font.family, font);
-                }
-
-
             } 
             #endregion
 
@@ -105,7 +122,10 @@ namespace GoogleFontDownloader
                         string[] fontParts = fontFullName.Split(':');
                         fontName = fontParts[0].Replace('+', ' ');
                         fontTiles = fontParts[1].Split(',');
-
+                    }
+                    else
+                    {
+                        fontName = fontFullName.Replace('+', ' ');
                     }
 
                     if (fonts.ContainsKey(fontName))
@@ -122,65 +142,14 @@ namespace GoogleFontDownloader
                             }
                         }
 
-                        if(fontSubsets != null)
-                        {
-                            foreach (string fontSubset in fontSubsets)
-                            {
-                                if (font.parsedSubsets.ContainsKey(fontSubset))
-                                    font.parsedSubsets[fontSubset] = true;
-                            }
-                        }
-
                         fonts[fontName] = font;
                     }
                 }
             }
             #endregion
-            
-            foreach (var font in fonts)
-            {
-                string key = font.Key.Replace(' ', '+');
-                fontTree.Invoke((MethodInvoker)delegate
-                {
-                    TreeNode node = fontTree.Nodes.Add(key, font.Key);
-                    
-                    //check
-                    if(font.Value.selected)
-                    {
-                        node.Checked = true;
-                    }
 
-                    if (font.Value.fonts.Count > 1)
-                    {
-                        TreeNode subNode = node.Nodes.Add(key + "/selectAllTile", "Types");
-                        foreach (var fontTile in font.Value.fonts)
-                        {
-                            if(fontTile.Value != null && fontTile.Value.selected)
-                            {
-                                CalcLoadTime(true);
-                            }
-
-                            subNode.Nodes.Add(key + "/tile|" + fontTile.Key, fixFontTileName(fontTile.Key)).Checked = (fontTile.Value == null ? false : fontTile.Value.selected);
-                        }
-                    }
-
-                    if (font.Value.subsets.Count > 1)
-                    {
-                        TreeNode subNode = node.Nodes.Add(key + "/selectAllSubset", "Languages");
-                        foreach (var subset in font.Value.parsedSubsets)
-                        {
-                            if (subset.Key == "menu")
-                                continue;
-
-                            if (subset.Value)
-                            {
-                                CalcLoadTime(true);
-                            }
-                            subNode.Nodes.Add(key + "/subset|" + subset.Key, fixSubsetName(subset.Key)).Checked = subset.Value;
-                        }
-                    }
-                });
-            }
+            buildFontTree();
+            CalcLoadTime();
         }
 
         public string fixSubsetName(string subset)
@@ -228,8 +197,6 @@ namespace GoogleFontDownloader
                     break;
             }
 
-            
-
             return fontTile;
         }
 
@@ -244,70 +211,92 @@ namespace GoogleFontDownloader
             return char.ToUpper(s[0]) + s.Substring(1);
         }
 
-        private void CheckChildeNodeWhenParentChecked(TreeNode node, Boolean isChecked)
-        {
-            if (node.Name != "" || !node.Name.EndsWith("/selectAllTile") || !node.Name.EndsWith("/selectAllSubset"))
-                return; 
-
-            foreach (TreeNode item in node.Nodes)
-            {
-                item.Checked = isChecked;
-
-                if (item.Nodes.Count > 0)
-                {
-                    this.CheckChildeNodeWhenParentChecked(item, isChecked);
-                }
-            }
-        }
-
         private void CheckFontsInFontList(TreeNode node)
         {
-            if (node.Name == "" || node.Name.EndsWith("/selectAllTile") || node.Name.EndsWith("/selectAllSubset"))
+            if (node != null && node.Name == "")
                 return;
 
             string[] fontNameParts = node.Name.Split('/');
             string fontName = fontNameParts[0].Replace('+', ' ');
             string fontExtra = (fontNameParts.Count() == 2 ? fontNameParts[1] : null);
 
-            if(fontExtra == null)
+            if (fontExtra == null)
             {
                 string fontCleanName = fontName.Replace(' ', '+');
-                fonts[fontName].selected = node.Checked;
+
+                if (fonts[fontName].selected != node.Checked)
+                    fonts[fontName].selected = node.Checked;
+
                 if (fonts[fontName].fonts.Count() > 1 && fonts[fontName].fonts.ContainsKey("400"))
                 {
-                    fonts[fontName].fonts["400"].selected = true;
-                    node.Nodes[fontCleanName + "/selectAllTile"].Nodes[fontCleanName + "/tile|400"].Checked = true;
-                }
+                    if (fonts[fontName].fonts["400"] != null && fonts[fontName].fonts["400"].selected != node.Checked)
+                        fonts[fontName].fonts["400"].selected = node.Checked;
 
-                if (fonts[fontName].parsedSubsets.Count() > 0 && fonts[fontName].parsedSubsets.ContainsKey("latin"))
-                {
-                    fonts[fontName].parsedSubsets["latin"] = true;
-                    node.Nodes[fontCleanName + "/selectAllSubset"].Nodes[fontCleanName + "/subset|latin"].Checked = true;
+                    if (node.Nodes[fontCleanName + "/tile|400"] != null && node.Nodes[fontCleanName + "/tile|400"].Checked != node.Checked)
+                        node.Nodes[fontCleanName + "/tile|400"].Checked = node.Checked;
                 }
             }
             else
             {
                 string[] fontExtraParts = fontExtra.Split('|');
-                switch(fontExtraParts[0])
+                switch (fontExtraParts[0])
                 {
                     case "tile":
-                        fonts[fontName].fonts[fontExtraParts[1]].selected = node.Checked;
-                        break;
-                    case "subset":
-                        fonts[fontName].parsedSubsets[fontExtraParts[1]] = node.Checked;
+                        if(fonts[fontName].fonts[fontExtraParts[1]] != null && fonts[fontName].fonts[fontExtraParts[1]].selected != node.Checked)
+                            fonts[fontName].fonts[fontExtraParts[1]].selected = node.Checked;
                         break;
                 }
             }
         }
 
-        private void CalcLoadTime(bool check)
+        private void CalcLoadTime(bool check = true)
         {
-            if (check)
-                fontTileCounter++;
-            else
-                fontTileCounter--;
+            if(check)
+            {
+                fontTileCounter = 0;
+                foreach (var font in fonts)
+                {
+                    bool fontTileFound = false;
+                    foreach (var fontTile in font.Value.fonts)
+                    {
+                        if (fontTile.Value != null && fontTile.Value.selected)
+                        {
+                            fontTileCounter++;
+                            fontTileFound = true;
+                        }
+                    }
+                
+                    if(!fontTileFound && font.Value.selected)
+                    {
+                        fontTileCounter++;
+                    }
+                }
+            }
 
-            if(fontTileCounter >= 6)
+            if (loadTimeLabel.InvokeRequired)
+            {
+                loadTimeLabel.Invoke(((MethodInvoker)delegate
+                {
+                    if (fontTileCounter >= 6)
+                    {
+                        loadTimeLabel.BackColor = colorRed;
+                        loadTimeLabel.Text = "Slow";
+                    }
+                    else if (fontTileCounter >= 3)
+                    {
+                        loadTimeLabel.BackColor = colorYellow;
+                        loadTimeLabel.Text = "Moderate";
+                    }
+                    else if (fontTileCounter >= 0)
+                    {
+                        loadTimeLabel.BackColor = colorGreen;
+                        loadTimeLabel.Text = "Fast";
+                    }
+                }));
+                return;
+            }
+
+            if (fontTileCounter >= 6)
             {
                 loadTimeLabel.BackColor = colorRed;
                 loadTimeLabel.Text = "Slow";
@@ -363,8 +352,106 @@ namespace GoogleFontDownloader
                 fontNames.Add(fontName + (fontTile != "" ? ":" + fontTile : ""));
             }
 
-            cssURLBox.Text = Properties.Settings.Default.FontBaseURL + String.Join("|", fontNames) + (subsets.Count > 0 ? "&subset=" + String.Join(",", subsets) : "") ;
+            if (fontNames.Count > 0)
+                cssURLBox.Text = Properties.Settings.Default.FontBaseURL + String.Join("|", fontNames) + (subsets.Count > 0 ? "&subset=" + String.Join(",", subsets) : "");
+            else
+                cssURLBox.Text = "";
+
             this.Close();
+        }
+
+        private void fontSearch_TextChanged(object sender, EventArgs e)
+        {
+            buildFontTree(fontSearch.Text);
+        }
+
+        private void buildFontTree(string filter = "")
+        {
+            fontTree.Nodes.Clear();
+            foreach (var font in fonts)
+            {
+                string key = font.Key.Replace(' ', '+');
+
+                if (filter != "" && !font.Value.family.Contains(filter))
+                    continue;
+
+                if(fontTree.InvokeRequired)
+                {
+                    fontTree.Invoke((MethodInvoker)delegate
+                    {
+                        TreeNode node = fontTree.Nodes.Add(key, font.Key);
+
+                        //check
+                        if (font.Value.selected)
+                        {
+                            node.Checked = true;
+                        }
+
+                        fontTree.UpdateParentState(node);
+
+                        if (font.Value.fonts.Count > 1)
+                        {
+                            foreach (var fontTile in font.Value.fonts)
+                            {
+                                TreeNode subNode = node.Nodes.Add(key + "/tile|" + fontTile.Key, fixFontTileName(fontTile.Key));
+
+                                if(fontTile.Value != null)
+                                    subNode.Checked = fontTile.Value.selected;
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    TreeNode node = fontTree.Nodes.Add(key, font.Key);
+
+                    //check
+                    if (font.Value.selected)
+                    {
+                        node.Checked = true;
+                    }
+
+                    fontTree.UpdateParentState(node);
+
+                    if (font.Value.fonts.Count > 1)
+                    {
+                        foreach (var fontTile in font.Value.fonts)
+                        {
+                            TreeNode subNode = node.Nodes.Add(key + "/tile|" + fontTile.Key, fixFontTileName(fontTile.Key));
+
+                            if (fontTile.Value != null && fontTile.Value.selected)
+                                subNode.Checked = fontTile.Value.selected;
+                        }
+                    }
+                }                
+            }
+        }
+
+        private void resetSelect_Click(object sender, EventArgs e)
+        {
+            foreach (var font in fonts)
+            {
+                if (font.Value.fonts.Count > 1)
+                    foreach (var fontTile in font.Value.fonts)
+                    {
+                        if(font.Value.fonts[fontTile.Key] != null)
+                            font.Value.fonts[fontTile.Key].selected = false;
+                    }
+
+                fonts[font.Key].selected = false;
+            }
+
+            if(fontSearch.Text != "")
+            {
+                fontSearch.Text = "";
+            }
+            else
+            {
+                buildFontTree();
+            }
+
+            fontTileCounter = 0;
+            CalcLoadTime(false);
         }
     }
 }

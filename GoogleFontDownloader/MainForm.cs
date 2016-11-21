@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace GoogleFontDownloader
 {
     public partial class MainForm : Form
     {
+        Timer rotationTimer = new Timer();
         private string[] userAgents = new string[] {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36", // woff2
             "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"                                               // woff
@@ -25,6 +25,25 @@ namespace GoogleFontDownloader
             InitializeComponent();
             backgroundWorker.DoWork += BackgroundWorker_DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            cssURL.MouseDoubleClick += CssURL_MouseDoubleClick;
+            folderPath.MouseDoubleClick += FolderPath_MouseDoubleClick;
+            rotationTimer.Interval = 150;
+            rotationTimer.Tick += rotationTimer_Tick;
+
+            if (Properties.Settings.Default.lastCSSFolderPath != "")
+                cssFolderPath.Text = Properties.Settings.Default.lastCSSFolderPath;
+        }
+
+        private void FolderPath_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if(folderPath.Text.Trim() != "")
+                Process.Start(folderPath.Text);
+        }
+
+        private void CssURL_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (cssURL.Text.Contains(Properties.Settings.Default.FontBaseURL))
+                Process.Start(cssURL.Text);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -77,6 +96,9 @@ namespace GoogleFontDownloader
                 progressBar.Value = 0;
             });
 
+            Properties.Settings.Default.lastCSSFolderPath = cssFolderPath.Text;
+            Properties.Settings.Default.Save();
+
             backgroundWorker.RunWorkerAsync();
         }
 
@@ -128,7 +150,7 @@ namespace GoogleFontDownloader
                             saveName = fontName + count++ + fontExt;
                         }
 
-                        css = css.Replace(font[1], "fonts/" + saveName);
+                        css = css.Replace(font[1], cssFolderPath + saveName);
 
                         if (File.Exists(fontPath + saveName))
                             File.Delete(fontPath + saveName);
@@ -161,5 +183,64 @@ namespace GoogleFontDownloader
             Form selectFontForm = new FontSelectForm(cssURL);
             selectFontForm.Show();
         }
+
+        private void defaultCSSFolderPath_Click(object sender, EventArgs e)
+        {
+            cssFolderPath.Text = "fonts/";
+            Properties.Settings.Default.lastCSSFolderPath = "";
+            Properties.Settings.Default.Save();
+        }
+
+        #region EasterEgg
+        int logoClickCount = 0;
+        int moveStep = 2;
+        Image orginalImage;
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            clickCountLabel.Text += " . ";
+            if (++logoClickCount == 3)
+            {
+                orginalImage = logo.Image;
+                rotationTimer.Start();
+            }
+        }
+
+        private void rotationTimer_Tick(object sender, EventArgs e)
+        {
+            Image flipImage = logo.Image;
+            flipImage.RotateFlip(RotateFlipType.Rotate270FlipXY);
+            logo.Image = flipImage;
+
+            if (rotationTimer.Interval > 1)
+            {
+                rotationTimer.Interval -= 1;
+            }
+            else
+            {
+                if (this.logo.Location.X > this.Width)
+                {
+                    rotationTimer.Stop();
+                    MessageBox.Show("Created by Dreiwerken GmbH (https://www.dreiwerken.de/)", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    moveStep = -6;
+                    rotationTimer.Start();
+                }
+                else if(logo.Location.X < logo.Width * -1)
+                {
+                    moveStep = 1;
+                }
+                else if(logo.Location.X == 12 && moveStep == 1)
+                {
+                    rotationTimer.Stop();
+                    flipImage.RotateFlip(RotateFlipType.Rotate270FlipXY);
+                    flipImage.RotateFlip(RotateFlipType.Rotate270FlipXY);
+                    logo.Image = flipImage;
+                    clickCountLabel.Hide();
+                    moveStep = 2;
+                }
+
+                this.logo.Location = new System.Drawing.Point(this.logo.Location.X + moveStep, 10);
+            }
+        } 
+        #endregion
     }
 }

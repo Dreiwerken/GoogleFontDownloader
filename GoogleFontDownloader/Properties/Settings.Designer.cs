@@ -80,5 +80,17 @@ namespace GoogleFontDownloader.Properties {
                 return ((string)(this["FontBaseURL"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string lastCSSFolderPath {
+            get {
+                return ((string)(this["lastCSSFolderPath"]));
+            }
+            set {
+                this["lastCSSFolderPath"] = value;
+            }
+        }
     }
 }

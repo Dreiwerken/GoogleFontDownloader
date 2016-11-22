@@ -15,7 +15,7 @@ namespace GoogleFontDownloader
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //VersionCheck.CheckForUpdate();
+            VersionCheck.CheckForUpdate();
             Application.Run(new MainForm());
         }
     }

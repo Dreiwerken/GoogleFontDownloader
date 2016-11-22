@@ -37,7 +37,7 @@ namespace GoogleFontDownloader.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/Luzifix/GoogleFontDownloader/releases")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/Dreiwerken/GoogleFontDownloader/releases")]
         public string ReleaseURL {
             get {
                 return ((string)(this["ReleaseURL"]));
@@ -46,7 +46,7 @@ namespace GoogleFontDownloader.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://api.github.com/repos/Luzifix/GoogleFontDownloader/releases")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://api.github.com/repos/Dreiwerken/GoogleFontDownloader/releases")]
         public string ReleaseAPI {
             get {
                 return ((string)(this["ReleaseAPI"]));

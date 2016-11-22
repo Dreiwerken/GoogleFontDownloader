@@ -44,7 +44,7 @@
             this.cssFolderPath = new System.Windows.Forms.TextBox();
             this.defaultCSSFolderPath = new System.Windows.Forms.Button();
             this.logo = new System.Windows.Forms.PictureBox();
-            this.clickCountLabel = new System.Windows.Forms.Label();
+            this.copyright = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.logo)).BeginInit();
             this.SuspendLayout();
             // 
@@ -176,23 +176,27 @@
             this.logo.TabStop = false;
             this.logo.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
-            // clickCountLabel
+            // copyright
             // 
-            this.clickCountLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.clickCountLabel.Location = new System.Drawing.Point(-2, 205);
-            this.clickCountLabel.Name = "clickCountLabel";
-            this.clickCountLabel.Size = new System.Drawing.Size(508, 18);
-            this.clickCountLabel.TabIndex = 14;
-            this.clickCountLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.copyright.AutoSize = true;
+            this.copyright.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.copyright.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.copyright.Location = new System.Drawing.Point(0, 219);
+            this.copyright.Name = "copyright";
+            this.copyright.Size = new System.Drawing.Size(292, 13);
+            this.copyright.TabIndex = 15;
+            this.copyright.Text = "Created by Dreiwerken GmbH (https://www.dreiwerken.de/)";
+            this.copyright.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.copyright.Click += new System.EventHandler(this.copyright_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(503, 221);
+            this.ClientSize = new System.Drawing.Size(503, 234);
+            this.Controls.Add(this.copyright);
             this.Controls.Add(this.download);
             this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.clickCountLabel);
             this.Controls.Add(this.logo);
             this.Controls.Add(this.defaultCSSFolderPath);
             this.Controls.Add(this.label3);
@@ -233,7 +237,7 @@
         private System.Windows.Forms.Button defaultCSSFolderPath;
         private System.Windows.Forms.PictureBox logo;
         private System.Windows.Forms.Label title;
-        private System.Windows.Forms.Label clickCountLabel;
+        private System.Windows.Forms.Label copyright;
     }
 }
 

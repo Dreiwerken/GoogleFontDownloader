@@ -197,7 +197,7 @@ namespace GoogleFontDownloader
         Image orginalImage;
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            clickCountLabel.Text += " . ";
+            copyright.Text += " . ";
             if (++logoClickCount == 3)
             {
                 orginalImage = logo.Image;
@@ -219,10 +219,7 @@ namespace GoogleFontDownloader
             {
                 if (this.logo.Location.X > this.Width)
                 {
-                    rotationTimer.Stop();
-                    MessageBox.Show("Created by Dreiwerken GmbH (https://www.dreiwerken.de/)", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     moveStep = -6;
-                    rotationTimer.Start();
                 }
                 else if(logo.Location.X < logo.Width * -1)
                 {
@@ -232,15 +229,18 @@ namespace GoogleFontDownloader
                 {
                     rotationTimer.Stop();
                     flipImage.RotateFlip(RotateFlipType.Rotate270FlipXY);
-                    flipImage.RotateFlip(RotateFlipType.Rotate270FlipXY);
                     logo.Image = flipImage;
-                    clickCountLabel.Hide();
                     moveStep = 2;
                 }
 
                 this.logo.Location = new System.Drawing.Point(this.logo.Location.X + moveStep, 10);
             }
-        } 
+        }
         #endregion
+
+        private void copyright_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://www.dreiwerken.de/");
+        }
     }
 }

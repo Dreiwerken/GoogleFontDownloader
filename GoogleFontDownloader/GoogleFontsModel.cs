@@ -23,8 +23,8 @@ namespace GoogleFontDownloader
         public int popularity { get; set; }
         public int size { get; set; }
         public IList<string> subsets { get; set; }
-        public Dictionary<string, bool> parsedSubsets { get; set; } = new Dictionary<string, bool>(); // not in API
         public int trending { get; set; }
+        public Dictionary<string, bool> fontTiles { get; set; } = new Dictionary<string, bool>(); // not in API
         public bool selected { get; set; } // not in API
     }
 

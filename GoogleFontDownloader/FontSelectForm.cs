@@ -40,6 +40,7 @@ namespace GoogleFontDownloader
         {
             initComplete = true;
             fontTree.Enabled = true;
+            loading.Visible = false;
         }
 
         private void FontTree_AfterCheck(object sender, TreeViewEventArgs e)
@@ -101,16 +102,22 @@ namespace GoogleFontDownloader
 
                 
                 foreach (GoogleFontEntryModel font in parsedfonts.familyMetadataList.OrderBy(f => f.defaultSort))
+                {
+
+                    // parse fontTiles 
+                    foreach (var fontTile in font.fonts)
+                        font.fontTiles[fontTile.Key] = false;
+
                     fonts.Add(font.family, font);
+                }
             } 
             #endregion
 
             #region Read fonts from string
-            Match match = Regex.Match(cssURLBox.Text, @"fonts\.googleapis\.com\/css\?family=([a-zA-Z\|\+\:\,0-9]+)($|(&|&amp;)subset=([a-zA-Z\,\-]+))");
+            Match match = Regex.Match(cssURLBox.Text, @"fonts\.googleapis\.com\/css\?family=([a-zA-Z\|\+\:\,0-9]+)");
             if (match.Groups.Count >= 2)
             {
                 string[] fontStrings = match.Groups[1].ToString().Split('|');
-                string[] fontSubsets = (match.Groups.Count >= 4 ? match.Groups[4].ToString().Split(',') : null);
 
                 foreach (string fontFullName in fontStrings)
                 {
@@ -137,8 +144,8 @@ namespace GoogleFontDownloader
                         {
                             foreach(string fontTile in fontTiles)
                             {
-                                if (font.fonts.ContainsKey(fontTile))
-                                    font.fonts[fontTile].selected = true;
+                                if (font.fontTiles.ContainsKey(fontTile))
+                                    font.fontTiles[fontTile] = true;
                             }
                         }
 
@@ -227,13 +234,13 @@ namespace GoogleFontDownloader
                 if (fonts[fontName].selected != node.Checked)
                     fonts[fontName].selected = node.Checked;
 
-                if (fonts[fontName].fonts.Count() > 1 && fonts[fontName].fonts.ContainsKey("400"))
+                if (fonts[fontName].fontTiles.Count() > 1 && fonts[fontName].fontTiles.ContainsKey("400"))
                 {
-                    if (fonts[fontName].fonts["400"] != null && fonts[fontName].fonts["400"].selected != node.Checked)
-                        fonts[fontName].fonts["400"].selected = node.Checked;
+                    if (fonts[fontName].fontTiles["400"] != node.Checked)
+                        fonts[fontName].fontTiles["400"] = true;
 
                     if (node.Nodes[fontCleanName + "/tile|400"] != null && node.Nodes[fontCleanName + "/tile|400"].Checked != node.Checked)
-                        node.Nodes[fontCleanName + "/tile|400"].Checked = node.Checked;
+                        node.Nodes[fontCleanName + "/tile|400"].Checked = true;
                 }
             }
             else
@@ -242,8 +249,8 @@ namespace GoogleFontDownloader
                 switch (fontExtraParts[0])
                 {
                     case "tile":
-                        if(fonts[fontName].fonts[fontExtraParts[1]] != null && fonts[fontName].fonts[fontExtraParts[1]].selected != node.Checked)
-                            fonts[fontName].fonts[fontExtraParts[1]].selected = node.Checked;
+                        if(fonts[fontName].fontTiles[fontExtraParts[1]] != node.Checked)
+                            fonts[fontName].fontTiles[fontExtraParts[1]] = node.Checked;
                         break;
                 }
             }
@@ -257,9 +264,9 @@ namespace GoogleFontDownloader
                 foreach (var font in fonts)
                 {
                     bool fontTileFound = false;
-                    foreach (var fontTile in font.Value.fonts)
+                    foreach (var fontTile in font.Value.fontTiles)
                     {
-                        if (fontTile.Value != null && fontTile.Value.selected)
+                        if (fontTile.Value)
                         {
                             fontTileCounter++;
                             fontTileFound = true;
@@ -327,9 +334,9 @@ namespace GoogleFontDownloader
                 string fontTile = "";
 
                 #region Read font tile
-                foreach (var tile in font.Value.fonts)
+                foreach (var tile in font.Value.fontTiles)
                 {
-                    if (tile.Value.selected)
+                    if (tile.Value)
                     {
                         fontTile += tile.Key + ',';
                     }
@@ -340,15 +347,7 @@ namespace GoogleFontDownloader
                     fontTile = fontTile.Remove(fontTile.Length - 1);
                 }
                 #endregion
-
-                #region Read subset
-                foreach (var subset in font.Value.parsedSubsets)
-                {
-                    if (!subsets.Contains(subset.Key) && subset.Value)
-                        subsets.Add(subset.Key);
-                }
-                #endregion
-
+                
                 fontNames.Add(fontName + (fontTile != "" ? ":" + fontTile : ""));
             }
 
@@ -372,7 +371,7 @@ namespace GoogleFontDownloader
             {
                 string key = font.Key.Replace(' ', '+');
 
-                if (filter != "" && !font.Value.family.Contains(filter))
+                if (filter != "" && !font.Value.family.ToLower().Contains(filter.ToLower()))
                     continue;
 
                 if(fontTree.InvokeRequired)
@@ -389,14 +388,15 @@ namespace GoogleFontDownloader
 
                         fontTree.UpdateParentState(node);
 
-                        if (font.Value.fonts.Count > 1)
+                        if (font.Value.fontTiles.Count > 1)
                         {
-                            foreach (var fontTile in font.Value.fonts)
+                            foreach (var fontTile in font.Value.fontTiles)
                             {
                                 TreeNode subNode = node.Nodes.Add(key + "/tile|" + fontTile.Key, fixFontTileName(fontTile.Key));
+                                fontTree.UpdateParentState(subNode);
 
-                                if(fontTile.Value != null)
-                                    subNode.Checked = fontTile.Value.selected;
+                                if (subNode.Checked != fontTile.Value)
+                                    subNode.Checked = fontTile.Value;
                             }
                         }
                     });
@@ -413,29 +413,30 @@ namespace GoogleFontDownloader
 
                     fontTree.UpdateParentState(node);
 
-                    if (font.Value.fonts.Count > 1)
+                    if (font.Value.fontTiles.Count > 1)
                     {
-                        foreach (var fontTile in font.Value.fonts)
+                        foreach (var fontTile in font.Value.fontTiles)
                         {
                             TreeNode subNode = node.Nodes.Add(key + "/tile|" + fontTile.Key, fixFontTileName(fontTile.Key));
+                            fontTree.UpdateParentState(subNode);
 
-                            if (fontTile.Value != null && fontTile.Value.selected)
-                                subNode.Checked = fontTile.Value.selected;
+                            if (subNode.Checked != fontTile.Value)
+                                subNode.Checked = fontTile.Value;
                         }
                     }
-                }                
+                }            
             }
+
         }
 
         private void resetSelect_Click(object sender, EventArgs e)
         {
             foreach (var font in fonts)
             {
-                if (font.Value.fonts.Count > 1)
-                    foreach (var fontTile in font.Value.fonts)
+                if (font.Value.fontTiles.Count > 1)
+                    foreach (var fontTile in font.Value.fontTiles)
                     {
-                        if(font.Value.fonts[fontTile.Key] != null)
-                            font.Value.fonts[fontTile.Key].selected = false;
+                        font.Value.fontTiles[fontTile.Key] = false;
                     }
 
                 fonts[font.Key].selected = false;

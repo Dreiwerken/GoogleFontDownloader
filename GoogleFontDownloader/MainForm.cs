@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -15,6 +16,8 @@ namespace GoogleFontDownloader
     public partial class MainForm : Form
     {
         Timer rotationTimer = new Timer();
+        private bool downloadSuccess = false;
+        private string key = null;
         private string[] userAgents = new string[] {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36", // woff2
             "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"                                               // woff
@@ -29,6 +32,7 @@ namespace GoogleFontDownloader
             folderPath.MouseDoubleClick += FolderPath_MouseDoubleClick;
             rotationTimer.Interval = 150;
             rotationTimer.Tick += rotationTimer_Tick;
+            key = Properties.Settings.Default.Key;
 
             if (Properties.Settings.Default.lastCSSFolderPath != "")
                 cssFolderPath.Text = Properties.Settings.Default.lastCSSFolderPath;
@@ -105,6 +109,7 @@ namespace GoogleFontDownloader
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             string css = String.Empty;
+            downloadSuccess = false;
 
             using (var webClient = new WebClient())
             {
@@ -150,7 +155,7 @@ namespace GoogleFontDownloader
                             saveName = fontName + count++ + fontExt;
                         }
 
-                        css = css.Replace(font[1], cssFolderPath + saveName);
+                        css = css.Replace(font[1], cssFolderPath.Text + saveName);
 
                         if (File.Exists(fontPath + saveName))
                             File.Delete(fontPath + saveName);
@@ -164,10 +169,11 @@ namespace GoogleFontDownloader
                     }
 
                     File.WriteAllText(folderPath.Text + "/fonts.css", css);
+                    downloadSuccess = true;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message + "\nPlease try again.", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -175,7 +181,8 @@ namespace GoogleFontDownloader
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show("Download complete!", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if(downloadSuccess)
+                MessageBox.Show("Download complete!", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void selectCSS_Click(object sender, EventArgs e)
@@ -191,17 +198,25 @@ namespace GoogleFontDownloader
             Properties.Settings.Default.Save();
         }
 
-        #region EasterEgg
+        #region Logo
         int logoClickCount = 0;
         int moveStep = 2;
-        Image orginalImage;
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             copyright.Text += " . ";
-            if (++logoClickCount == 3)
+            if (++logoClickCount % 3 == 0)
             {
-                orginalImage = logo.Image;
+                key = Properties.Settings.Default.Key;
+                logo.Click -= pictureBox1_Click;
                 rotationTimer.Start();
+            }
+
+            if (logoClickCount == 11)
+            {
+                string[] keys = key.Split('|');
+                DialogResult res = MessageBox.Show(keys[0], this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if(res == DialogResult.Yes)
+                    Process.Start(keys[1]);
             }
         }
 
@@ -228,9 +243,12 @@ namespace GoogleFontDownloader
                 else if(logo.Location.X == 12 && moveStep == 1)
                 {
                     rotationTimer.Stop();
-                    flipImage.RotateFlip(RotateFlipType.Rotate270FlipXY);
-                    logo.Image = flipImage;
+
+                    key = Encoding.UTF8.GetString(Convert.FromBase64String(Encoding.UTF8.GetString(Convert.FromBase64String(key))));
+                    logo.Image = Properties.Resources.gfd;
+                    rotationTimer.Interval = 150;
                     moveStep = 2;
+                    logo.Click += pictureBox1_Click;
                 }
 
                 this.logo.Location = new System.Drawing.Point(this.logo.Location.X + moveStep, 10);
@@ -240,7 +258,7 @@ namespace GoogleFontDownloader
 
         private void copyright_Click(object sender, EventArgs e)
         {
-            Process.Start("https://www.dreiwerken.de/");
+            Process.Start("https://www.dreiwerken.de/?ref=GoogleFontDownloader");
         }
     }
 }

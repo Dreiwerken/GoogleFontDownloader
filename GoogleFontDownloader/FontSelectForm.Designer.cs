@@ -39,6 +39,7 @@
             this.resetSelect = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.fontTree = new GoogleFontDownloader.TriStateTreeView();
+            this.loading = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -115,11 +116,22 @@
             this.fontTree.TabIndex = 6;
             this.fontTree.TriStateStyleProperty = GoogleFontDownloader.TriStateTreeView.TriStateStyles.GoogleFontDownloader;
             // 
+            // loading
+            // 
+            this.loading.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.loading.Location = new System.Drawing.Point(12, 38);
+            this.loading.Name = "loading";
+            this.loading.Size = new System.Drawing.Size(552, 240);
+            this.loading.TabIndex = 10;
+            this.loading.Text = "Loading. . .";
+            this.loading.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // FontSelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(569, 330);
+            this.Controls.Add(this.loading);
             this.Controls.Add(this.resetSelect);
             this.Controls.Add(this.loadTimeLabel);
             this.Controls.Add(this.label2);
@@ -148,5 +160,6 @@
         private TriStateTreeView fontTree;
         private System.Windows.Forms.Button resetSelect;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Label loading;
     }
 }

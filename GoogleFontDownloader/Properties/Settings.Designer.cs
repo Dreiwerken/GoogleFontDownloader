@@ -92,5 +92,15 @@ namespace GoogleFontDownloader.Properties {
                 this["lastCSSFolderPath"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("U1hNZ2RHaGxJR05oYTJVZ2FYTWdZU0JzYVdVL2ZHaDBkSEJ6T2k4dmQzZDNMbmx2ZFhSMVltVXVZMjl0T" +
+            "DJWdFltVmtMMWsyYkdwR1lVdFNWSEpK")]
+        public string Key {
+            get {
+                return ((string)(this["Key"]));
+            }
+        }
     }
 }
